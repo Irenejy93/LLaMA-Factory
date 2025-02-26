@@ -34,7 +34,7 @@ from ..trainer_utils import create_custom_optimizer, create_custom_scheduler
 
 if TYPE_CHECKING:
     from torch.utils.data import Dataset
-    from transformers import PreTrainedModel, PreTrainedTokenizer, ProcessorMixin
+    from transformers import PreTrainedTokenizer, ProcessorMixin
     from transformers.trainer import PredictionOutput
 
     from ...hparams import FinetuningArguments
@@ -49,7 +49,11 @@ class CustomSeq2SeqTrainer(Seq2SeqTrainer):
     """
 
     def __init__(
-        self, finetuning_args: "FinetuningArguments", processor: Optional["ProcessorMixin"], **kwargs
+        self,
+        finetuning_args: "FinetuningArguments",
+        processor: Optional["ProcessorMixin"],
+        gen_kwargs: Optional[Dict[str, Any]] = None,
+        **kwargs,
     ) -> None:
         if is_transformers_version_greater_than("4.46"):
             kwargs["processing_class"] = kwargs.pop("tokenizer")
@@ -58,6 +62,9 @@ class CustomSeq2SeqTrainer(Seq2SeqTrainer):
 
         super().__init__(**kwargs)
         self.finetuning_args = finetuning_args
+        if gen_kwargs is not None:
+            # https://github.com/huggingface/transformers/blob/v4.45.0/src/transformers/trainer_seq2seq.py#L287
+            self._gen_kwargs = gen_kwargs
 
         if processor is not None:
             self.add_callback(SaveProcessorCallback(processor))
@@ -89,61 +96,32 @@ class CustomSeq2SeqTrainer(Seq2SeqTrainer):
         return super()._get_train_sampler()
 
     @override
-    def compute_loss(
-        self, model: "PreTrainedModel", inputs: Dict[str, "torch.Tensor"], return_outputs: bool = False, **kwargs
-    ) -> Union["torch.Tensor", Tuple["torch.Tensor", List["torch.Tensor"]]]:
-        r"""
-        Fixes the loss value. See https://github.com/huggingface/transformers/pull/35438 for details.
-        """
-        loss = super().compute_loss(model, inputs, return_outputs, **kwargs)
-        if kwargs.get("num_items_in_batch") and not getattr(self, "model_accepts_loss_kwargs", False):
-            if return_outputs:
-                loss = (loss[0] / self.args.gradient_accumulation_steps, *loss[1:])
-            else:
-                loss = loss / self.args.gradient_accumulation_steps
-
-        return loss
-
-    @override
     def prediction_step(
         self,
         model: "torch.nn.Module",
         inputs: Dict[str, Union["torch.Tensor", Any]],
         prediction_loss_only: bool,
         ignore_keys: Optional[List[str]] = None,
+        **gen_kwargs,
     ) -> Tuple[Optional[float], Optional["torch.Tensor"], Optional["torch.Tensor"]]:
         r"""
         Removes the prompt part in the generated tokens.
 
         Subclass and override to inject custom behavior.
         """
-        labels = inputs["labels"] if "labels" in inputs else None
-        if self.args.predict_with_generate:
-            assert self.processing_class.padding_side == "left", "This method only accepts left-padded tensor."
-            labels = labels.detach().clone() if labels is not None else None  # backup labels
-            prompt_len, label_len = inputs["input_ids"].size(-1), inputs["labels"].size(-1)
-            if prompt_len > label_len:
-                inputs["labels"] = self._pad_tensors_to_target_len(inputs["labels"], inputs["input_ids"])
-            if label_len > prompt_len:  # truncate the labels instead of padding the inputs (llama2 fp16 compatibility)
-                inputs["labels"] = inputs["labels"][:, :prompt_len]
+        if self.args.predict_with_generate:  # do not pass labels to model when generate
+            labels = inputs.pop("labels", None)
+        else:
+            labels = inputs.get("labels")
 
-        loss, generated_tokens, _ = super().prediction_step(  # ignore the returned labels (may be truncated)
-            model, inputs, prediction_loss_only=prediction_loss_only, ignore_keys=ignore_keys
+        loss, generated_tokens, _ = super().prediction_step(
+            model, inputs, prediction_loss_only=prediction_loss_only, ignore_keys=ignore_keys, **gen_kwargs
         )
         if generated_tokens is not None and self.args.predict_with_generate:
-            generated_tokens[:, :prompt_len] = self.processing_class.pad_token_id
+            generated_tokens[:, : inputs["input_ids"].size(-1)] = self.processing_class.pad_token_id
             generated_tokens = generated_tokens.contiguous()
 
         return loss, generated_tokens, labels
-
-    def _pad_tensors_to_target_len(self, src_tensor: "torch.Tensor", tgt_tensor: "torch.Tensor") -> "torch.Tensor":
-        r"""
-        Pads the tensor to the same length as the target tensor.
-        """
-        assert self.processing_class.pad_token_id is not None, "Pad token is required."
-        padded_tensor = self.processing_class.pad_token_id * torch.ones_like(tgt_tensor)
-        padded_tensor[:, -src_tensor.shape[-1] :] = src_tensor  # adopt left-padding
-        return padded_tensor.contiguous()  # in contiguous memory
 
     def save_predictions(
         self, dataset: "Dataset", predict_results: "PredictionOutput", skip_special_tokens: bool = True

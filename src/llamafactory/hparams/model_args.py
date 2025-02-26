@@ -58,20 +58,28 @@ class ProcessorArguments:
     Arguments pertaining to the image processor.
     """
 
-    image_resolution: int = field(
-        default=512 * 512,
-        metadata={"help": "Keeps the number of pixels of image below this resolution."},
+    image_max_pixels: int = field(
+        default=768 * 768,
+        metadata={"help": "The maximum number of pixels of image inputs."},
     )
-    video_resolution: int = field(
-        default=128 * 128,
-        metadata={"help": "Keeps the number of pixels of video below this resolution."},
+    image_min_pixels: int = field(
+        default=32 * 32,
+        metadata={"help": "The minimum number of pixels of image inputs."},
+    )
+    video_max_pixels: int = field(
+        default=256 * 256,
+        metadata={"help": "The maximum number of pixels of video inputs."},
+    )
+    video_min_pixels: int = field(
+        default=16 * 16,
+        metadata={"help": "The minimum number of pixels of video inputs."},
     )
     video_fps: float = field(
         default=2.0,
         metadata={"help": "The frames to sample per second for video inputs."},
     )
     video_maxlen: int = field(
-        default=64,
+        default=128,
         metadata={"help": "The maximum number of sampled frames for video inputs."},
     )
 
@@ -87,7 +95,7 @@ class ExportArguments:
         metadata={"help": "Path to the directory to save the exported model."},
     )
     export_size: int = field(
-        default=1,
+        default=5,
         metadata={"help": "The file shard size (in GB) of the exported model."},
     )
     export_device: Literal["cpu", "auto"] = field(
@@ -201,7 +209,7 @@ class ModelArguments(QuantizationArguments, ProcessorArguments, ExportArguments,
         default=True,
         metadata={"help": "Whether or not to use memory-efficient model loading."},
     )
-    rope_scaling: Optional[Literal["linear", "dynamic"]] = field(
+    rope_scaling: Optional[Literal["linear", "dynamic", "yarn", "llama3"]] = field(
         default=None,
         metadata={"help": "Which scaling strategy should be adopted for the RoPE embeddings."},
     )

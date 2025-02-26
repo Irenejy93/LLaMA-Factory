@@ -1,14 +1,13 @@
 ### Note: DO NOT use quantized model or quantization_bit when merging lora adapters
 
 ### model
-model_name_or_path:  meta-llama/Llama-3.2-3B-Instruct
-adapter_name_or_path: saves/llama3.2-3b/lora/sft/company_ver2
-template: llama3_company_ex
-finetuning_type: lora
+model_name_or_path: meta-llama/Meta-Llama-3-8B-Instruct
+adapter_name_or_path: saves/llama3-8b/lora/sft
+template: llama3
 trust_remote_code: true
 
 ### export
-export_dir: models/llama3_lora_sft
-export_size: 2
+export_dir: output/llama3_lora_sft
+export_size: 5
 export_device: cpu
 export_legacy_format: false

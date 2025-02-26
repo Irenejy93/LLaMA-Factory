@@ -53,6 +53,34 @@
       "assistant_tag": "assistant"
     }
   },
+  "mllm_audio_demo": {
+    "file_name": "mllm_audio_demo.json",
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "messages",
+      "audios": "audios"
+    },
+    "tags": {
+      "role_tag": "role",
+      "content_tag": "content",
+      "user_tag": "user",
+      "assistant_tag": "assistant"
+    }
+  },
+  "mllm_video_demo": {
+    "file_name": "mllm_video_demo.json",
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "messages",
+      "videos": "videos"
+    },
+    "tags": {
+      "role_tag": "role",
+      "content_tag": "content",
+      "user_tag": "user",
+      "assistant_tag": "assistant"
+    }
+  },
   "alpaca_en": {
     "hf_hub_url": "llamafactory/alpaca_en",
     "ms_hub_url": "llamafactory/alpaca_en"
@@ -262,6 +290,68 @@
   },
   "ruozhiba_gpt4": {
     "hf_hub_url": "hfl/ruozhiba_gpt4_turbo"
+  },
+  "neo_sft": {
+    "hf_hub_url": "m-a-p/neo_sft_phase2",
+    "formatting": "sharegpt"
+  },
+  "magpie_pro_300k": {
+    "hf_hub_url": "Magpie-Align/Magpie-Pro-300K-Filtered",
+    "formatting": "sharegpt"
+  },
+  "magpie_ultra": {
+    "hf_hub_url": "argilla/magpie-ultra-v0.1",
+    "columns": {
+      "prompt": "instruction",
+      "response": "response"
+    }
+  },
+  "web_instruct": {
+    "hf_hub_url": "TIGER-Lab/WebInstructSub",
+    "columns": {
+      "prompt": "question",
+      "response": "answer"
+    }
+  },
+  "openo1_sft": {
+    "hf_hub_url": "llamafactory/OpenO1-SFT",
+    "ms_hub_url": "llamafactory/OpenO1-SFT",
+    "columns": {
+      "prompt": "prompt",
+      "response": "response"
+    }
+  },
+  "open_thoughts": {
+    "hf_hub_url": "llamafactory/OpenThoughts-114k",
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "messages"
+    },
+    "tags": {
+      "role_tag": "role",
+      "content_tag": "content",
+      "user_tag": "user",
+      "assistant_tag": "assistant",
+      "system_tag": "system"
+    }
+  },
+  "open_r1_math": {
+    "hf_hub_url": "llamafactory/OpenR1-Math-94k",
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "messages"
+    },
+    "tags": {
+      "role_tag": "role",
+      "content_tag": "content",
+      "user_tag": "user",
+      "assistant_tag": "assistant",
+      "system_tag": "system"
+    }
+  },
+  "chinese_r1_distill": {
+    "hf_hub_url": "Congliu/Chinese-DeepSeek-R1-Distill-data-110k-SFT",
+    "ms_hub_url": "liucong/Chinese-DeepSeek-R1-Distill-data-110k-SFT"
   },
   "llava_1k_en": {
     "hf_hub_url": "BUAADreamer/llava-en-zh-2k",

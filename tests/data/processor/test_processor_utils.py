@@ -1,4 +1,4 @@
-# Copyright 2024 the LlamaFactory team.
+# Copyright 2025 the LlamaFactory team.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ from typing import Tuple
 
 import pytest
 
-from llamafactory.data.processors.processor_utils import infer_seqlen
+from llamafactory.data.processor.processor_utils import infer_seqlen
 
 
 @pytest.mark.parametrize(
