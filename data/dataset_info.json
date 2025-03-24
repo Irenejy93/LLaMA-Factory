@@ -625,7 +625,11 @@
     "file_name": "company_extract.json"
 },
 "deidentification":{
-    "file_name": "deidentification.json"
+    "hf_hub_url": "irene93/deidentification-chat-ko",
+    "columns": {
+            "prompt":"instruction",
+            "response":"output"
+    }
 },
 "news_analysis":{
     "hf_hub_url": "irene93/news-analysis-ko",
