@@ -634,8 +634,9 @@
 "news_analysis":{
     "hf_hub_url": "irene93/news-analysis-ko",
     "columns": {
-	    "prompt":"body",
-	    "response":"analysis"
+            "prompt":"input",
+            "response":"output"
     }
   }
 }
+
